@@ -232,19 +232,37 @@
         <div class="features">
           <label class="feature">
             <input type="checkbox" data-bit="0" />
-            Solar powered
+            Solar panel
             <span class="bit">bit 0</span>
           </label>
 
           <label class="feature">
             <input type="checkbox" data-bit="1" />
-            Battery powered
+            Battery
             <span class="bit">bit 1</span>
           </label>
 
           <label class="feature">
+            <input type="checkbox" data-bit="2" />
+            Mains power
+            <span class="bit">bit 2</span>
+          </label>
+
+          <label class="feature">
+            <input type="checkbox" data-bit="3" />
+            Backup power / UPS
+            <span class="bit">bit 3</span>
+          </label>
+
+          <label class="feature">
+            <input type="checkbox" data-bit="4" />
+            Expected 24/7 operation
+            <span class="bit">bit 4</span>
+          </label>
+
+          <label class="feature">
             <input type="checkbox" data-bit="5" checked />
-            Telemetry
+            Provides telemetry
             <span class="bit">bit 5</span>
           </label>
 
@@ -252,6 +270,30 @@
             <input type="checkbox" data-bit="6" checked />
             Remotely managed
             <span class="bit">bit 6</span>
+          </label>
+
+          <label class="feature">
+            <input type="checkbox" data-bit="7" />
+            Internet connection
+            <span class="bit">bit 7</span>
+          </label>
+
+          <label class="feature">
+            <input type="checkbox" data-bit="8" />
+            Packet observer / analyzer
+            <span class="bit">bit 8</span>
+          </label>
+
+          <label class="feature">
+            <input type="checkbox" data-bit="9" />
+            Gateway / bridge
+            <span class="bit">bit 9</span>
+          </label>
+
+          <label class="feature">
+            <input type="checkbox" data-bit="10" />
+            Public API
+            <span class="bit">bit 10</span>
           </label>
 
           <label class="feature">
@@ -265,12 +307,25 @@
             External antenna
             <span class="bit">bit 12</span>
           </label>
-        </div>
 
-        <details>
-          <summary>Reserved / custom bits</summary>
-          <div class="features" id="reserved"></div>
-        </details>
+          <label class="feature">
+            <input type="checkbox" data-bit="13" />
+            Directional antenna
+            <span class="bit">bit 13</span>
+          </label>
+
+          <label class="feature">
+            <input type="checkbox" data-bit="14" />
+            Elevated site (roof, mast, hill)
+            <span class="bit">bit 14</span>
+          </label>
+
+          <label class="feature">
+            <input type="checkbox" data-bit="15" />
+            Mobile or temporary repeater
+            <span class="bit">bit 15</span>
+          </label>
+        </div>
       </fieldset>
     </section>
 
@@ -307,22 +362,6 @@
   </main>
 
   <script>
-    const knownBits = new Set([0, 1, 5, 6, 11, 12]);
-    const reserved = document.getElementById("reserved");
-
-    for (let bit = 0; bit < 16; bit++) {
-      if (knownBits.has(bit)) continue;
-
-      const label = document.createElement("label");
-      label.className = "feature";
-      label.innerHTML = `
-        <input type="checkbox" data-bit="${bit}" />
-        Reserved bit ${bit}
-        <span class="bit">bit ${bit}</span>
-      `;
-      reserved.appendChild(label);
-    }
-
     const feat1Input = document.getElementById("feat1");
     const feat1Out = document.getElementById("feat1Out");
     const feat2Out = document.getElementById("feat2Out");
