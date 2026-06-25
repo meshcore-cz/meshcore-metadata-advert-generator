@@ -217,7 +217,7 @@
 <body>
   <main>
     <h1>MeshCore Advert Metadata Generator</h1>
-    <p>Select repeater capabilities and copy the generated Remote Admin command.</p>
+    <p>Select repeater capabilities, decode a FEAT2 value, and copy the generated Remote Admin command.</p>
 
     <section class="panel">
       <div class="field">
@@ -228,6 +228,12 @@
 
       <fieldset>
         <legend>FEAT2 capabilities</legend>
+
+        <div class="field">
+          <label for="feat2Decode">Decode FEAT2 value</label>
+          <input id="feat2Decode" type="text" placeholder="0x8003" inputmode="text" spellcheck="false" />
+          <small>Decimal or hexadecimal, from 0 to 65535. Updates the checkboxes below.</small>
+        </div>
 
         <div class="features">
           <label class="feature">
@@ -363,6 +369,7 @@
 
   <script>
     const feat1Input = document.getElementById("feat1");
+    const feat2DecodeInput = document.getElementById("feat2Decode");
     const feat1Out = document.getElementById("feat1Out");
     const feat2Out = document.getElementById("feat2Out");
     const feat2Decimal = document.getElementById("feat2Decimal");
@@ -370,6 +377,8 @@
     const command = document.getElementById("command");
     const status = document.getElementById("status");
     const copyButton = document.getElementById("copy");
+    const feat2Checkboxes = document.querySelectorAll('input[type="checkbox"][data-bit]');
+    let syncingFeat2 = false;
 
     function parseUInt16(text) {
       const value = text.trim();
@@ -389,7 +398,7 @@
     function getFeat2() {
       let value = 0;
 
-      document.querySelectorAll('input[type="checkbox"][data-bit]').forEach((input) => {
+      feat2Checkboxes.forEach((input) => {
         if (input.checked) {
           value |= 1 << Number(input.dataset.bit);
         }
@@ -398,10 +407,24 @@
       return value & 0xffff;
     }
 
+    function setFeat2(value) {
+      feat2Checkboxes.forEach((input) => {
+        const bit = Number(input.dataset.bit);
+        input.checked = (value & (1 << bit)) !== 0;
+      });
+    }
+
+    function syncFeat2DecodeInput(value) {
+      syncingFeat2 = true;
+      feat2DecodeInput.value = toHex16(value);
+      syncingFeat2 = false;
+    }
+
     function update() {
       const feat1 = parseUInt16(feat1Input.value);
       const feat2 = getFeat2();
 
+      syncFeat2DecodeInput(feat2);
       feat2Out.textContent = toHex16(feat2);
       feat2Decimal.textContent = String(feat2);
       feat2Binary.textContent = feat2.toString(2).padStart(16, "0");
@@ -424,6 +447,29 @@
     }
 
     feat1Input.addEventListener("input", update);
+
+    feat2DecodeInput.addEventListener("input", () => {
+      if (syncingFeat2) return;
+
+      const text = feat2DecodeInput.value.trim();
+      if (!text) {
+        status.textContent = "";
+        status.className = "status";
+        update();
+        return;
+      }
+
+      const feat2 = parseUInt16(text);
+      if (feat2 === null) {
+        status.textContent = "FEAT2 must be between 0 and 65535.";
+        status.className = "status error";
+        return;
+      }
+
+      setFeat2(feat2);
+      update();
+    });
+
     document.addEventListener("change", (event) => {
       if (event.target.matches('input[type="checkbox"][data-bit]')) update();
     });
