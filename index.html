@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MeshCore Advert Metadata Generator</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f5f5f5;
+      --panel: #ffffff;
+      --text: #171717;
+      --muted: #666;
+      --border: #d7d7d7;
+      --accent: #111;
+      --accent-text: #fff;
+      --ok: #0a7a38;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111;
+        --panel: #1a1a1a;
+        --text: #f3f3f3;
+        --muted: #aaa;
+        --border: #3a3a3a;
+        --accent: #f3f3f3;
+        --accent-text: #111;
+        --ok: #6dde98;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 32px 16px;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(760px, 100%);
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      line-height: 1.15;
+    }
+
+    p {
+      color: var(--muted);
+      margin: 0 0 24px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    .field:last-child { margin-bottom: 0; }
+
+    label, legend {
+      font-weight: 650;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text);
+      padding: 11px 12px;
+      font: inherit;
+    }
+
+    input[type="text"]:focus {
+      outline: 2px solid var(--text);
+      outline-offset: 2px;
+    }
+
+    small {
+      color: var(--muted);
+    }
+
+    fieldset {
+      border: 0;
+      margin: 0;
+      padding: 0;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .feature:hover {
+      border-color: var(--text);
+    }
+
+    .feature input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+    }
+
+    .bit {
+      margin-left: auto;
+      color: var(--muted);
+      font: 0.8rem ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    details {
+      margin-top: 16px;
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .output-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    @media (max-width: 560px) {
+      .output-grid { grid-template-columns: 1fr; }
+    }
+
+    .output {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .output span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-bottom: 5px;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .command {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+      margin-top: 12px;
+    }
+
+    .command code {
+      flex: 1;
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      background: var(--bg);
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 16px;
+      background: var(--accent);
+      color: var(--accent-text);
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    button:active { transform: translateY(1px); }
+
+    .status {
+      min-height: 1.5em;
+      margin-top: 8px;
+      color: var(--ok);
+      font-size: 0.9rem;
+    }
+
+    .error {
+      color: #c62828;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>MeshCore Advert Metadata Generator</h1>
+    <p>Select repeater capabilities and copy the generated Remote Admin command.</p>
+
+    <section class="panel">
+      <div class="field">
+        <label for="feat1">FEAT1 schema identifier</label>
+        <input id="feat1" type="text" value="0x4E01" inputmode="text" spellcheck="false" />
+        <small>Decimal or hexadecimal, from 0 to 65535.</small>
+      </div>
+
+      <fieldset>
+        <legend>FEAT2 capabilities</legend>
+
+        <div class="features">
+          <label class="feature">
+            <input type="checkbox" data-bit="0" />
+            Solar powered
+            <span class="bit">bit 0</span>
+          </label>
+
+          <label class="feature">
+            <input type="checkbox" data-bit="1" />
+            Battery powered
+            <span class="bit">bit 1</span>
+          </label>
+
+          <label class="feature">
+            <input type="checkbox" data-bit="5" checked />
+            Telemetry
+            <span class="bit">bit 5</span>
+          </label>
+
+          <label class="feature">
+            <input type="checkbox" data-bit="6" checked />
+            Remotely managed
+            <span class="bit">bit 6</span>
+          </label>
+
+          <label class="feature">
+            <input type="checkbox" data-bit="11" />
+            Outdoor installation
+            <span class="bit">bit 11</span>
+          </label>
+
+          <label class="feature">
+            <input type="checkbox" data-bit="12" />
+            External antenna
+            <span class="bit">bit 12</span>
+          </label>
+        </div>
+
+        <details>
+          <summary>Reserved / custom bits</summary>
+          <div class="features" id="reserved"></div>
+        </details>
+      </fieldset>
+    </section>
+
+    <section class="panel">
+      <div class="output-grid">
+        <div class="output">
+          <span>FEAT1</span>
+          <code id="feat1Out">0x4E01</code>
+        </div>
+
+        <div class="output">
+          <span>FEAT2</span>
+          <code id="feat2Out">0x0060</code>
+        </div>
+
+        <div class="output">
+          <span>FEAT2 decimal</span>
+          <code id="feat2Decimal">96</code>
+        </div>
+
+        <div class="output">
+          <span>FEAT2 binary</span>
+          <code id="feat2Binary">0000000001100000</code>
+        </div>
+      </div>
+
+      <div class="command">
+        <code id="command">set advert.features 0x4E01 0x0060</code>
+        <button id="copy" type="button">Copy</button>
+      </div>
+
+      <div id="status" class="status" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script>
+    const knownBits = new Set([0, 1, 5, 6, 11, 12]);
+    const reserved = document.getElementById("reserved");
+
+    for (let bit = 0; bit < 16; bit++) {
+      if (knownBits.has(bit)) continue;
+
+      const label = document.createElement("label");
+      label.className = "feature";
+      label.innerHTML = `
+        <input type="checkbox" data-bit="${bit}" />
+        Reserved bit ${bit}
+        <span class="bit">bit ${bit}</span>
+      `;
+      reserved.appendChild(label);
+    }
+
+    const feat1Input = document.getElementById("feat1");
+    const feat1Out = document.getElementById("feat1Out");
+    const feat2Out = document.getElementById("feat2Out");
+    const feat2Decimal = document.getElementById("feat2Decimal");
+    const feat2Binary = document.getElementById("feat2Binary");
+    const command = document.getElementById("command");
+    const status = document.getElementById("status");
+    const copyButton = document.getElementById("copy");
+
+    function parseUInt16(text) {
+      const value = text.trim();
+
+      if (!/^(?:0x[0-9a-f]+|[0-9]+)$/i.test(value)) {
+        return null;
+      }
+
+      const number = Number.parseInt(value, value.toLowerCase().startsWith("0x") ? 16 : 10);
+      return Number.isInteger(number) && number >= 0 && number <= 0xffff ? number : null;
+    }
+
+    function toHex16(value) {
+      return "0x" + value.toString(16).toUpperCase().padStart(4, "0");
+    }
+
+    function getFeat2() {
+      let value = 0;
+
+      document.querySelectorAll('input[type="checkbox"][data-bit]').forEach((input) => {
+        if (input.checked) {
+          value |= 1 << Number(input.dataset.bit);
+        }
+      });
+
+      return value & 0xffff;
+    }
+
+    function update() {
+      const feat1 = parseUInt16(feat1Input.value);
+      const feat2 = getFeat2();
+
+      feat2Out.textContent = toHex16(feat2);
+      feat2Decimal.textContent = String(feat2);
+      feat2Binary.textContent = feat2.toString(2).padStart(16, "0");
+
+      if (feat1 === null) {
+        feat1Out.textContent = "Invalid";
+        command.textContent = "Enter a valid FEAT1 value";
+        status.textContent = "FEAT1 must be between 0 and 65535.";
+        status.className = "status error";
+        copyButton.disabled = true;
+        return;
+      }
+
+      const feat1Hex = toHex16(feat1);
+      feat1Out.textContent = feat1Hex;
+      command.textContent = `set advert.features ${feat1Hex} ${toHex16(feat2)}`;
+      status.textContent = "";
+      status.className = "status";
+      copyButton.disabled = false;
+    }
+
+    feat1Input.addEventListener("input", update);
+    document.addEventListener("change", (event) => {
+      if (event.target.matches('input[type="checkbox"][data-bit]')) update();
+    });
+
+    copyButton.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(command.textContent);
+        status.textContent = "Command copied.";
+        status.className = "status";
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(command);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        status.textContent = "Command selected. Press Ctrl+C or Cmd+C.";
+        status.className = "status";
+      }
+    });
+
+    update();
+  </script>
+</body>
+</html>
